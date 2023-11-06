@@ -1,9 +1,10 @@
 package com.example.musicsquare.app
 
+import MultiThemePreviews
 import MusicSquareNavHost
 import TopLevelDestination
 import android.annotation.SuppressLint
-import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -15,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 
@@ -23,12 +23,16 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 @Composable
 fun MusicSquareApp(appState: MusicSquareAppState = rememberMusicSquareAppState()) {
     Scaffold(bottomBar = {
-        MusicSquareBottomBar(
-            destinations = appState.topLevelDestinations,
-            onNavigateToDestination = appState::navigateToTopLevelDestination,
-            currentDestination = appState.currentDestination,
-            modifier = Modifier.testTag("MusicSquareBottomBar")
-        )
+        Box {
+            if (appState.currentDestination?.route.toString() in TopLevelDestination.routes) {
+                MusicSquareBottomBar(
+                    destinations = appState.topLevelDestinations,
+                    onNavigateToDestination = appState::navigateToTopLevelDestination,
+                    currentDestination = appState.currentDestination,
+                    modifier = Modifier.testTag("MusicSquareBottomBar")
+                )
+            }
+        }
     }) {
         MusicSquareNavHost(
             navController = appState.navController
@@ -103,7 +107,7 @@ fun MusicSquareNavigationBar(
     )
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@MultiThemePreviews
 @Composable
 fun MusicSquareNavigationBarPreview() {
     MusicSquareNavigationBar {
