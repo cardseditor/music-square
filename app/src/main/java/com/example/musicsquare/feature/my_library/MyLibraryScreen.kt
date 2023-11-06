@@ -1,4 +1,4 @@
-package com.example.musicsquare.feature.home
+package com.example.musicsquare.feature.my_library
 
 import MultiThemePreviews
 import MusicItem
@@ -24,19 +24,19 @@ import androidx.compose.ui.unit.dp
 import com.example.musicsquare.core.data.music.Music
 import com.example.musicsquare.core.designsystem.theme.MusicSquareTheme
 
-object HomeDestination {
-    const val route = "home"
+object MyLibraryDestination {
+    const val route = "my_library"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(
+fun MyLibrary(
     navigateToListening: () -> Unit = { },
 ) {
     val musicList = MyLibraryViewModel().musicList
     var isAllButtonSelected by remember { mutableStateOf(true) }
     Scaffold(topBar = {
-        TopAppBar(title = { Text(text = "Music Square") })
+        TopAppBar(title = { Text(text = TopLevelDestination.MY_LIBRARY.title) })
     }) {
         LazyColumn(
             modifier = Modifier.padding(it)
@@ -76,8 +76,8 @@ fun Home(
 
 @MultiThemePreviews
 @Composable
-fun HomePreview() {
+fun MyLibraryPreview() {
     MusicSquareTheme {
-        Home()
+        MyLibrary()
     }
 }

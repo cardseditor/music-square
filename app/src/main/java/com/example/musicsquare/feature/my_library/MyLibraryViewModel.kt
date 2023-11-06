@@ -1,11 +1,7 @@
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.musicsquare.core.data.music.Music
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
-class MusicViewModel constructor(
+class MyLibraryViewModel constructor(
 //    private val musicRepository: MusicRepository
 ) : ViewModel() {
 
