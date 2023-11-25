@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AssistChipDefaults
@@ -29,7 +30,7 @@ import com.example.musicsquare.core.data.music.Music
 import com.example.musicsquare.core.designsystem.theme.MusicSquareTheme
 
 object SearchDestination {
-    const val route = "search"
+    const val ROUTE = "search"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,15 +76,20 @@ fun Search(
                     )
                 }
             }
-            items(musicList.size) { it ->
-                MusicItem(musicList[it])
-            }
             items(50) {
-                MusicItem(Music.mock)
-//                    music ->
-//                    if (isAllButtonSelected || music.isFavorite) {
-//                        MusicItem(music)
-//                    }
+                if (isAllButtonSelected || Music.mock.isFavorite) {
+                    MusicItem(
+                        Music.mock,
+                        navigateToListening = navigateToListening,
+                    )
+                }
+            }
+            item {
+                Spacer(
+                    modifier = Modifier
+                        .safeContentPadding()
+                        .padding(bottom = 80.dp)
+                )
             }
         }
     }
