@@ -32,9 +32,9 @@ class MusicSquareAppState(
 
     val currentTopLevelDestination: TopLevelDestination?
         @Composable get() = when (currentDestination?.route) {
-            HomeDestination.route -> TopLevelDestination.HOME
-            SearchDestination.route -> TopLevelDestination.SEARCH
-            MyLibraryDestination.route -> TopLevelDestination.MY_LIBRARY
+            HomeDestination.ROUTE -> TopLevelDestination.HOME
+            SearchDestination.ROUTE -> TopLevelDestination.SEARCH
+            MyLibraryDestination.ROUTE -> TopLevelDestination.MY_LIBRARY
             else -> null
         }
 
@@ -50,9 +50,9 @@ class MusicSquareAppState(
         }
 
         when (topLevelDestination) {
-            TopLevelDestination.HOME -> navController.navigate(HomeDestination.route)
-            TopLevelDestination.SEARCH -> navController.navigate(SearchDestination.route)
-            TopLevelDestination.MY_LIBRARY -> navController.navigate(MyLibraryDestination.route)
+            TopLevelDestination.HOME -> navController.navigate(HomeDestination.ROUTE, topLevelNavOptions)
+            TopLevelDestination.SEARCH -> navController.navigate(SearchDestination.ROUTE, topLevelNavOptions)
+            TopLevelDestination.MY_LIBRARY -> navController.navigate(MyLibraryDestination.ROUTE, topLevelNavOptions)
         }
     }
 }
