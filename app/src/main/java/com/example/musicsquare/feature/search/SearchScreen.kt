@@ -1,7 +1,7 @@
 package com.example.musicsquare.feature.search
 
 import MultiThemePreviews
-import MusicItem
+import com.example.musicsquare.core.designsystem.components.MusicItem
 import MyLibraryViewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -80,7 +80,6 @@ fun Search(
                 if (isAllButtonSelected || Music.mock.isFavorite) {
                     MusicItem(
                         Music.mock,
-                        navigateToListening = navigateToListening,
                     )
                 }
             }

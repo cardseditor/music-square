@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,15 +32,17 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.musicsquare.core.data.music.Music
 import com.example.musicsquare.core.service.MusicPlaybackService
+import com.example.musicsquare.feature.home.PlaybackStateHolder
 
 @Composable
-fun MusicItem(
-    music: Music,
-    onMusicSelected: (Music) -> Unit = { },
+fun ActiveMusicItem(
+    navigateToListening: () -> Unit = { },
 ) {
     val context = LocalContext.current
+    val currentMusic by PlaybackStateHolder.currentMusic.collectAsState()
+    val isPlaying by PlaybackStateHolder.isPlaying.collectAsState()
+
     fun controlMusicService(action: String, musicUri: Uri) {
         val serviceIntent = Intent(context, MusicPlaybackService::class.java).apply {
             putExtra("ACTION", action)
@@ -53,14 +58,11 @@ fun MusicItem(
             .fillMaxWidth()
             .clickable(
                 enabled = true,
-                onClick = {
-                    controlMusicService("PLAY", music.path)
-                    onMusicSelected(music)
-                },
+                onClick = navigateToListening,
             )
             .padding(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 4.dp)
     ) {
-        val albumArt = music.albumArt
+        val albumArt = currentMusic.albumArt
         if (albumArt != null) {
             Image(
                 bitmap = albumArt.asImageBitmap(),
@@ -88,19 +90,27 @@ fun MusicItem(
         Spacer(modifier = Modifier.padding(4.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = music.title, overflow = TextOverflow.Ellipsis, maxLines = 1
+                text = currentMusic.title, overflow = TextOverflow.Ellipsis, maxLines = 1
             )
             Text(
-                text = music.author,
+                text = currentMusic.author,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.outline
             )
         }
-        IconButton(onClick = { /*TODO*/ }) {
+        IconToggleButton(
+            checked = isPlaying,
+            onCheckedChange = { shouldBePlaying ->
+                if (shouldBePlaying) {
+                    controlMusicService("PLAY", currentMusic.path)
+                } else {
+                    controlMusicService("PAUSE", currentMusic.path)
+                }
+            }) {
             Icon(
-                imageVector = Icons.Rounded.MoreVert,
-                contentDescription = "actions",
+                imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                contentDescription = if (isPlaying) "Pause" else "Play"
             )
         }
     }

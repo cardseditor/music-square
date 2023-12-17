@@ -1,7 +1,7 @@
 package com.example.musicsquare.feature.my_library
 
 import MultiThemePreviews
-import MusicItem
+import com.example.musicsquare.core.designsystem.components.MusicItem
 import MyLibraryViewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -65,7 +65,6 @@ fun MyLibrary(
                 if (isAllButtonSelected || Music.mock.isFavorite) {
                     MusicItem(
                         Music.mock,
-                        navigateToListening = navigateToListening,
                     )
                 }
             }
