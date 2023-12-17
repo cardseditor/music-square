@@ -14,9 +14,13 @@ data class Music(
     val albumArt: Bitmap? = null
 ) {
     companion object {
-        private fun fromUri(path: Uri): Music {
-            val retriever = MediaMetadataRetriever().apply {
-                setDataSource(path.toString())
+        fun fromUri(path: Uri): Music {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(path.toString())
+            } catch (e: IllegalArgumentException) {
+                retriever.release()
+                return mock
             }
 
             val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
@@ -41,6 +45,7 @@ data class Music(
             )
         }
 
-        val mock = Music.fromUri(Uri.parse("file:///storage/emulated/0/Music/CultureCode.mp3"))
+        val mock = fromUri(Uri.parse("file:///storage/emulated/0/Music/CultureCode.mp3"))
+//        val mock = fromUri(Uri.parse("https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"))
     }
 }

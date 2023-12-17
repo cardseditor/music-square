@@ -50,9 +50,20 @@ class MusicSquareAppState(
         }
 
         when (topLevelDestination) {
-            TopLevelDestination.HOME -> navController.navigate(HomeDestination.ROUTE, topLevelNavOptions)
-            TopLevelDestination.SEARCH -> navController.navigate(SearchDestination.ROUTE, topLevelNavOptions)
-            TopLevelDestination.MY_LIBRARY -> navController.navigate(MyLibraryDestination.ROUTE, topLevelNavOptions)
+            TopLevelDestination.HOME -> navController.navigate(
+                HomeDestination.ROUTE,
+                topLevelNavOptions
+            )
+
+            TopLevelDestination.SEARCH -> navController.navigate(
+                SearchDestination.ROUTE,
+                topLevelNavOptions
+            )
+
+            TopLevelDestination.MY_LIBRARY -> navController.navigate(
+                MyLibraryDestination.ROUTE,
+                topLevelNavOptions
+            )
         }
     }
 }

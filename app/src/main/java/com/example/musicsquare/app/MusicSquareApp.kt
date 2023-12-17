@@ -1,10 +1,10 @@
 package com.example.musicsquare.app
 
 import MultiThemePreviews
-import MusicItem
-import MusicSquareNavHost
 import TopLevelDestination
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +21,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import com.example.musicsquare.core.data.music.Music
+import com.example.musicsquare.app.navigation.MusicSquareNavHost
+import com.example.musicsquare.core.data.music.MusicViewModel
+import com.example.musicsquare.core.designsystem.components.ActiveMusicItem
 import com.example.musicsquare.feature.listening.ListeningDestination
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MusicSquareApp(appState: MusicSquareAppState = rememberMusicSquareAppState()) {
+    val musicViewModel: MusicViewModel = viewModel()
+
     Scaffold(bottomBar = {
         Box {
             if (appState.currentDestination?.route.toString() in TopLevelDestination.routes) {
@@ -38,8 +44,7 @@ fun MusicSquareApp(appState: MusicSquareAppState = rememberMusicSquareAppState()
                             .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.primaryContainer)
                     ) {
-                        MusicItem(
-                            Music.mock,
+                        ActiveMusicItem(
                             navigateToListening = {
                                 appState.navController.navigate(
                                     ListeningDestination.ROUTE

@@ -1,3 +1,5 @@
+package com.example.musicsquare.app.navigation
+
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable

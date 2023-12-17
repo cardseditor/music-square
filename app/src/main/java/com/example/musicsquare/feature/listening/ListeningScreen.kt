@@ -2,6 +2,8 @@ package com.example.musicsquare.feature.listening
 
 import MultiThemePreviews
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -25,7 +27,6 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
@@ -36,11 +37,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,19 +47,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaSession
 import androidx.navigation.NavController
-import com.example.musicsquare.core.data.active_music.ActiveMusic
-import com.example.musicsquare.core.data.music.Music
 import com.example.musicsquare.core.designsystem.theme.MusicSquareTheme
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import kotlinx.coroutines.delay
+import com.example.musicsquare.core.service.MusicPlaybackService
+import com.example.musicsquare.feature.home.PlaybackStateHolder
 import kotlin.math.roundToInt
 
 object ListeningDestination {
@@ -70,7 +59,7 @@ object ListeningDestination {
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Listening(
     navController: NavController = NavController(LocalContext.current),
@@ -78,41 +67,19 @@ fun Listening(
     onFavoriteClicked: () -> Unit = { },
     onMoreOptionsClicked: () -> Unit = { },
 ) {
-    val mediaAudioPermissionState =
-        rememberPermissionState(android.Manifest.permission.READ_MEDIA_AUDIO)
-
+//    val mediaAudioPermissionState =
+//        rememberPermissionState(android.Manifest.permission.READ_MEDIA_AUDIO)
     val context = LocalContext.current
-    val activeMusic by remember {
-        mutableStateOf(ActiveMusic(isPlaying = false, progress = 0.0f, currentMusic = Music.mock))
-    }
-    val player = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(activeMusic.currentMusic.path))
-            prepare()
-            addListener(object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    activeMusic.isPlaying = isPlaying
-                }
-            })
-        }
-    }
-    val mediaSession = remember {
-        MediaSession.Builder(context, player).build()
-    }
+    val isPlaying by PlaybackStateHolder.isPlaying.collectAsState()
+    val progress by PlaybackStateHolder.progress.collectAsState()
+    val activeMusic by PlaybackStateHolder.currentMusic.collectAsState()
 
-    DisposableEffect(Unit) {
-        onDispose {
-            mediaSession.release()
-            player.release()
+    fun controlMusicService(action: String, musicUri: Uri) {
+        val serviceIntent = Intent(context, MusicPlaybackService::class.java).apply {
+            putExtra("ACTION", action)
+            putExtra("MUSIC_URI", musicUri.toString())
         }
-    }
-
-    LaunchedEffect(activeMusic.isPlaying) {
-        while (activeMusic.isPlaying) {
-            val progress = player.currentPosition.toFloat() / player.duration.toFloat()
-            activeMusic.updateProgress(progress)
-            delay(1000)
-        }
+        context.startService(serviceIntent)
     }
 
     Scaffold(topBar = {
@@ -141,7 +108,7 @@ fun Listening(
                 .padding(it)
                 .padding(32.dp)
         ) {
-            val albumArt = activeMusic.currentMusic.albumArt
+            val albumArt = activeMusic.albumArt
             if (albumArt != null) {
                 Image(
                     bitmap = albumArt.asImageBitmap(),
@@ -178,53 +145,54 @@ fun Listening(
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = Music.mock.title,
+                    text = activeMusic.title,
                     style = MaterialTheme.typography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
                 Text(
-                    text = Music.mock.author,
+                    text = activeMusic.author,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
             }
-            if (!mediaAudioPermissionState.status.isGranted) {
-                Column {
-                    val textToShow = if (mediaAudioPermissionState.status.shouldShowRationale) {
-                        "The media access is important for this app. Please grant the permission."
-                    } else {
-                        "Media access not available"
-                    }
-
-                    Text(textToShow)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { mediaAudioPermissionState.launchPermissionRequest() }) {
-                        Text("Request permission")
-                    }
-                }
-            }
+//            if (!mediaAudioPermissionState.status.isGranted) {
+//                Column {
+//                    val textToShow = if (mediaAudioPermissionState.status.shouldShowRationale) {
+//                        "The media access is important for this app. Please grant the permission."
+//                    } else {
+//                        "Media access not available"
+//                    }
+//
+//                    Text(textToShow)
+//                    Spacer(modifier = Modifier.height(8.dp))
+//                    Button(onClick = { mediaAudioPermissionState.launchPermissionRequest() }) {
+//                        Text("Request permission")
+//                    }
+//                }
+//            }
             Spacer(modifier = Modifier.height(16.dp))
             LinearProgressIndicator(
-                progress = activeMusic.progress,
+                progress = progress,
                 strokeCap = StrokeCap.Round,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = formatSeconds(
-                        (activeMusic.progress * activeMusic.currentMusic.totalSeconds).roundToInt()
+                        (progress * activeMusic.totalSeconds).roundToInt()
                     )
                 )
                 Text(
                     text = formatSeconds(
-                        activeMusic.currentMusic.totalSeconds
+                        activeMusic.totalSeconds
                     )
                 )
             }
@@ -238,14 +206,17 @@ fun Listening(
                     )
                 }
                 Spacer(modifier = Modifier.padding(16.dp))
-                FilledTonalIconToggleButton(checked = activeMusic.isPlaying,
+                FilledTonalIconToggleButton(checked = isPlaying,
                     onCheckedChange = { shouldBePlaying ->
-                        activeMusic.isPlaying = shouldBePlaying
-                        player.playWhenReady = shouldBePlaying
+                        if (shouldBePlaying) {
+                            controlMusicService("PLAY", activeMusic.path)
+                        } else {
+                            controlMusicService("PAUSE", activeMusic.path)
+                        }
                     }) {
                     Icon(
-                        imageVector = if (activeMusic.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                        contentDescription = if (activeMusic.isPlaying) "Pause" else "Play"
+                        imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play"
                     )
                 }
                 Spacer(modifier = Modifier.padding(16.dp))

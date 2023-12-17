@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
